@@ -6,10 +6,10 @@ L'application vis a maximiser la productivité en alternant des périodes de con
 L'interface utilisateur est conçue pour être intuitve et non intrusive, permettant aux utilisateurs de se concentrer sur leur travail tout en gardant un œil sur le temps restant. La présence d'un minuteur visuel prenant la majeure partie de l'application contribue à cette non distraction.
 
 ### Fonctionnalités
-- Minuteur visuel pour les sessions de travail et de pause
-- Historique des sessions passées
-- Notifications sonores à la fin des sessions
-- Système de comptes utilisateurs
+- [X] Minuteur visuel pour les sessions de travail et de pause
+- [X] Historique des sessions passées
+- [X] Notifications sonores à la fin des sessions
+- [X] Système de comptes utilisateurs
 
 ### Contribution
 Pour contribuer à ce projet, veuillez suivre les étapes suivantes :
