@@ -1,10 +1,16 @@
-const generate_a_joke = async () => {
-  const response = await window.versions.joke()
-  const jokeContainer = document.getElementById("joke")
-    jokeContainer.innerText = response
-}
+const startTimer = document.getElementById('start-timer')
+startTimer.addEventListener('click', () => {
+	const minutes = document.getElementById('minutes').value
+	const secondes = document.getElementById('secondes').value
+	window.versions.startTimer(minutes, secondes)
+})
 
-// const generate_joke = document.getElementById("generate-joke")
-// generate_joke.addEventListener("click", async () => {
-//   generate_a_joke()
-// })
+const pauseButton = document.getElementById('pause-timer')
+pauseButton.addEventListener('click', () => {
+	window.versions.pauseTimer()
+})
+
+const resetTimer = document.getElementById('reset-timer')
+resetTimer.addEventListener('click', () => {
+	window.versions.resetTimer()
+})
