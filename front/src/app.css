@@ -1,0 +1,46 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background-color: #f1f7ed;
+	width: 100vw;
+	height: 100vh;
+}
+
+#container {
+	align-self: center;
+	justify-self: center;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+	width: 75%;
+	aspect-ratio: 1 / 1;
+}
+
+#timer {
+	width: 50%;
+	/* circle size */
+	aspect-ratio: 1 / 1;
+	/* keep it a perfect circle */
+	border-radius: 50%;
+	/* make it circular */
+	background: conic-gradient(#243e36 0% 25%,
+			/* progress color */
+			#7ca982 25% 100%
+			/* remaining track color */
+		);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#inner-timer {
+	width: 30%;
+	/* inner circle */
+	aspect-ratio: 1 / 1;
+	border-radius: 50%;
+	background: #f1f7ed;
+}
