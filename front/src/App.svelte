@@ -1,40 +1,66 @@
 <script>
+	const INTERVAL_TICK = 1;
+
+	let minutes = 0;
+	let secondes = 0;
+	let remainingPourcentage = 0;
+	let timerInterval;
+
 	const startTimer = () => {
-		// Get minutes and secondes values
-		const minutes = document.getElementById('minutes').textContent;
-		const secondes = document.getElementById('secondes').textContent;
-		console.log(`Renderer: Starting timer`);
+		console.log(`Renderer: Starting timer: ${minutes}:${secondes}`);
 		window.timer.startTimer(minutes, secondes);
+		if (timerInterval) {
+			clearInterval(timerInterval);
+		}
+		timerInterval = setInterval(() => {
+			updateTimeLeft();
+		}, INTERVAL_TICK);
 	}
 
 	const pauseTimer = () => {
 		console.log(`Renderer: Pausing timer`);
 		window.timer.pauseTimer();
+		if (timerInterval) {
+			clearInterval(timerInterval);
+		}
 	}
 
 	const resetTimer = () => {
 		console.log(`Renderer: Resetting timer`);
 		window.timer.resetTimer();
+		if (timerInterval) {
+			clearInterval(timerInterval);
+		}
+		minutes = 0;
+		secondes = 0;
+		remainingPourcentage = 0;
+	}
+
+	const updateTimeLeft = async () => {
+		const timeLeft = await window.timer.getTimeLeft();
+		remainingPourcentage = timeLeft.endingPourcent;
 	}
 </script>
 
 <main>
 	<div id="container">
-		<h1>PomoCompanion</h1>
-		<div id="timer">
-			<div id="inner-timer">
-
+		<div id="content">
+			<h1>PomoCompanion</h1>
+			<div id="timer" style="background: conic-gradient(#243e36 0% {remainingPourcentage}%, #7ca982 {remainingPourcentage}% 100%);">
+				<div id="inner-timer">
+					
+				</div>
 			</div>
-		</div>
-		<div>
-			<p>Choose your timer:</p>
-			<input type="number" id="minutes" placeholder="Minutes">
-			<input type="number" id="secondes" placeholder="Secondes">
-		</div>
-		<div>
-			<button id="start-timer" onclick={startTimer}>Start</button>
-			<button id="pause-timer" onclick={pauseTimer}>Pause</button>
-			<button id="reset-timer" onclick={resetTimer}>Reset</button>
+			<div>
+				<p>Choose your timer:</p>
+				<input type="number" bind:value={minutes} min="0" max="59">
+				<input type="number" bind:value={secondes} min="0" max="59">
+			</div>
+			<div>
+				<button onclick={startTimer}>Play</button>
+				<button onclick={pauseTimer}>Pause</button>
+				<button onclick={resetTimer}>Reset</button>
+			</div>
 		</div>
 	</div>
 </main>
