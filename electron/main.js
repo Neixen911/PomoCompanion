@@ -2,14 +2,19 @@ const { app, BrowserWindow, ipcMain } = require('electron/main')
 const fs = require('node:fs')
 const path = require('node:path')
 
+global.hours = 0;
 global.minutes = 0;
-global.secondes = 0;
+global.remaining = 0;
 
 global.endDate = null;
-global.remainingMs = 0;
 global.timerInterval = null;
 
+global.nextPause = null;
+global.phasePause = 0;
+
 const INTERVAL_TICK = 100;
+const allowedMinutesValues = [0, 1, 15, 30, 45, 60];
+const allowedHoursValues = [0, 1, 2, 3, 4, 5, 6];
 
 const createWindow = () => {
 	const win = new BrowserWindow({
@@ -26,35 +31,36 @@ const createWindow = () => {
 
 const setTimerEnd = (endDate, remaining) => {
 	global.endDate = endDate;
-	global.remainingMs = remaining;
+	global.remaining = remaining;
 	console.log(`Timer will end at ${global.endDate}`);
-	console.log(`Remaining ms set to ${global.remainingMs}`);
+	console.log(`Set to ${global.remaining} sec remaining`);
 }
 
-const playTimer = (minutes, secondes) => {
+const playTimer = (hours, minutes) => {
 	if (global.endDate === null) {
-		let endDate = new Date();
+		let endDate = new Date(Date.now());
+		global.hours = hours;
 		global.minutes = minutes;
-		global.secondes = secondes;
+		endDate.setHours(endDate.getHours() + global.hours);
 		endDate.setMinutes(endDate.getMinutes() + global.minutes);
-		endDate.setSeconds(endDate.getSeconds() + global.secondes);
-		setTimerEnd(endDate, (minutes * 60 + secondes) * 1000);
+		setTimerEnd(endDate, (hours * 60 * 60 + minutes * 60));
 	} else if (global.timerInterval === null) {
-		let endDate = new Date();
-		endDate.setTime(endDate.getTime() + global.remainingMs);
-		setTimerEnd(endDate, global.remainingMs);
-		console.log(`Resuming timer with ${global.remainingMs} ms remaining`);
+		let endDate = new Date(Date.now());
+		endDate.setTime(endDate.getTime() + global.remaining * 1000);
+		setTimerEnd(endDate, global.remaining);
+		console.log(`Resuming timer with ${global.remaining} sec remaining`);
 	}
+
 	if (global.timerInterval === null) {
 		global.timerInterval = setInterval(() => {
-			const now = new Date();
-			global.remainingMs = global.endDate.getTime() - now.getTime();
-			console.log(`Time left: ${global.remainingMs} ms`);
-			if (global.remainingMs <= 0) {
+			const now = new Date(Date.now());
+			global.remaining = (global.endDate.getTime() - now.getTime()) / 1000;
+			// console.log(`Time left: ${global.remaining} sec`);
+			if (global.remaining <= 0) {
 				clearInterval(global.timerInterval);
 				global.timerInterval = null;
 				global.endDate = null;
-				global.remainingMs = 0;
+				global.remaining = 0;
 				console.log(`Timer end at ${now}`);
 			}
 		}, INTERVAL_TICK);
@@ -65,24 +71,24 @@ const pauseTimer = () => {
 	if (global.timerInterval !== null) {
 		clearInterval(global.timerInterval);
 		global.timerInterval = null;
-		console.log(`Timer paused with ${global.remainingMs} ms remaining`);
+		console.log(`Timer paused with ${global.remaining} sec remaining`);
 	}
 }
 
 const resetTimer = () => {
-	if (global.timerInterval !== null) {
-		clearInterval(global.timerInterval);
-		global.timerInterval = null;
-		global.endDate = null;
-		global.remainingMs = 0;
-		console.log(`Timer reset`);
-	}
+	clearInterval(global.timerInterval);
+	global.timerInterval = null;
+	global.endDate = null;
+	global.remaining = 0;
+	global.hours = 0;
+	global.minutes = 0;
+	console.log(`Timer reset`);
 }
 
 app.whenReady().then(() => {
-	ipcMain.on('startTimer', async (_event, minutes, secondes) => {
+	ipcMain.on('startTimer', async (_event, hours, minutes) => {
 		console.log(`Launching timer ...`)
-		playTimer(minutes, secondes);
+		playTimer(hours, minutes);
 	});
 	ipcMain.on('pauseTimer', async (_event) => {
 		console.log('Pausing timer ...')
@@ -92,13 +98,20 @@ app.whenReady().then(() => {
 		console.log('Resetting timer ...')
 		resetTimer();
 	});
+	ipcMain.handle('getAllowedMinutesValues', async () => {
+		return allowedMinutesValues;
+	});
+	ipcMain.handle('getAllowedHoursValues', async () => {
+		return allowedHoursValues;
+	});
 	ipcMain.handle('getTimeLeft', async () => {
+		let hours = global.hours;
 		let minutes = global.minutes;
-		let secondes = global.secondes;
-		let remaining = global.remainingMs;
-		let total = (minutes * 60 + secondes) * 1000;
+		let remaining = global.remaining;
+		let total = hours * 60 * 60 + minutes * 60;
 		let endingPourcent = 100 - ((total - remaining) * 100 / total);
-		return { minutes, secondes, remaining, endingPourcent };
+		// console.log(`Getting time left: ${hours} hours, ${minutes} minutes, ${remaining} sec remaining, ${endingPourcent}% left`);
+		return { hours, minutes, remaining, endingPourcent };
 	});
 
 	createWindow()

@@ -5,4 +5,6 @@ contextBridge.exposeInMainWorld('timer', {
 	pauseTimer: () => ipcRenderer.send('pauseTimer'),
 	resetTimer: () => ipcRenderer.send('resetTimer'),
 	getTimeLeft: () => ipcRenderer.invoke('getTimeLeft'),
+	getAllowedMinutesValues: () => ipcRenderer.invoke('getAllowedMinutesValues'),
+	getAllowedHoursValues: () => ipcRenderer.invoke('getAllowedHoursValues'),
 })

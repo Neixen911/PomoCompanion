@@ -4,7 +4,9 @@ declare global {
             startTimer: (minutes: int, secondes: int) => Promise<void>;
             pauseTimer: () => Promise<void>;
             resetTimer: () => Promise<void>;
-            getTimeLeft: () => Promise<{ minutes: int; secondes: int; remaining: int, endingPourcent: int }>;
+            getTimeLeft: () => Promise<{ hours: int; minutes: int; remaining: int, endingPourcent: int }>;
+            getAllowedMinutesValues: () => Promise<int[]>;
+            getAllowedHoursValues: () => Promise<int[]>;
         };
     }
 }
