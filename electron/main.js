@@ -1,3 +1,4 @@
+const { session } = require('electron');
 const { app, BrowserWindow, ipcMain } = require('electron/main')
 const fs = require('node:fs')
 const path = require('node:path')
@@ -45,34 +46,40 @@ const initTimer = (hours, minutes) => {
 	console.log(`Initialising timer for ${hours} hours and ${minutes} minutes`);
 }
 
-const initPause = (pauseTimeValue, eachTimeValue) => {
+const initPause = (eachTimeValue, pauseTimeValue) => {
 	let now = new Date(Date.now());
-	let pauseTime = new Date(now.getTime() + 30 * 1000); // 30 sec for testing
-	let pauseEnd = new Date(pauseTime.getTime() + 5 * 1000); // 5 sec for testing
-	if (pauseTime <= global.endDate && pauseEnd <= global.endDate) {
-		global.pauseTime = pauseTime;
-		global.pauseEnd = pauseEnd;
-		console.log(`Pause scheduled at ${global.pauseTime} until ${global.pauseEnd}`);
-	} else {
-		global.pauseTime = null;
-		global.pauseEnd = null;
-		console.log(`No more pause scheduled before the end`);
+	let pauseTime = new Date(now.getTime() + pauseTimeValue * 1000); // 30 sec for testing
+	let pauseEnd = new Date(pauseTime.getTime() + eachTimeValue * 1000); // 5 sec for testing
+	if (global.remainingBeforePause !== null) {
+		if (pauseTime <= global.endDate && pauseEnd <= global.endDate) {
+			global.pauseTime = pauseTime;
+			global.pauseEnd = pauseEnd;
+			console.log(`Pause scheduled at ${global.pauseTime} until ${global.pauseEnd}`);
+		} else {
+			global.pauseTime = null;
+			global.pauseEnd = null;
+			global.remainingBeforePause = null;
+			console.log(`No more pause scheduled before the end`);
+		}
 	}
 }
 
-const resumedTimer = () => {
+const resumedTimer = (eachTimeValue, pauseTimeValue) => {
 	let endDate = new Date(Date.now());
 	endDate.setTime(endDate.getTime() + global.remaining * 1000);
 	setTimerEnd(endDate, global.remaining);
 	console.log(`Resuming timer with ${global.remaining} sec remaining`);
-	startingTimer();
+	startingTimer(eachTimeValue, pauseTimeValue);
 }
 
-const startingTimer = () => {
+const startingTimer = (eachTimeValue, pauseTimeValue) => {
 	console.log(`Starting / Restarting timer ...`);
 	global.timerInterval = setInterval(() => {
 		const now = new Date(Date.now());
 		global.remaining = (global.endDate.getTime() - now.getTime()) / 1000;
+		if (global.pauseTime) {
+			global.remainingBeforePause = (global.pauseTime.getTime() - now.getTime()) / 1000;
+		}
 		// console.log(`Time left: ${global.remaining} sec`);
 		if (global.pauseTime !== null) {
 			if (now >= global.pauseTime && !global.isInPause) {
@@ -82,7 +89,7 @@ const startingTimer = () => {
 			if (global.isInPause) {
 				if (now >= global.pauseEnd) {
 					console.log(`Ending pause time at ${global.pauseEnd}`);
-					initPause();
+					initPause(eachTimeValue, pauseTimeValue);
 					global.isInPause = false;
 				}
 			}
@@ -92,6 +99,7 @@ const startingTimer = () => {
 			global.timerInterval = null;
 			global.endDate = null;
 			global.remaining = 0;
+			global.remainingBeforePause = 0;
 			console.log(`Timer end at ${now}`);
 		}
 	}, INTERVAL_TICK);
@@ -115,15 +123,18 @@ const resetTimer = () => {
 
 app.whenReady().then(() => {
 	ipcMain.on('startTimer', async (_event, hours, minutes) => {
+		let pauseValue = 5;
+		let eachTime = 30;
 		if (global.paused === true) {
-			resumedTimer();
+			resumedTimer(pauseValue, eachTime);
+			initPause(pauseValue, global.remainingBeforePause)
 			global.paused = false;
 		} else {
 			if (global.endDate === null) {
 				initTimer(hours, minutes);
-				initPause();
+				initPause(pauseValue, eachTime);
 			}
-			startingTimer();
+			startingTimer(pauseValue, eachTime);
 		}
 	});
 
@@ -151,9 +162,10 @@ app.whenReady().then(() => {
 		let minutes = global.minutes;
 		let remaining = global.remaining;
 		let total = hours * 60 * 60 + minutes * 60;
-		let endingPourcent = 100 - ((total - remaining) * 100 / total);
-		// console.log(`Getting time left: ${hours} hours, ${minutes} minutes, ${remaining} sec remaining, ${endingPourcent}% left`);
-		return { hours, minutes, remaining, endingPourcent };
+		let endingPourcent = (100 - ((total - remaining) * 100 / total)).toFixed(2);
+		let sessionState = global.isInPause ? "Pause" : "Work";
+		// console.log(`Getting time left: ${hours} hours, ${minutes} minutes, ${remaining} sec remaining, ${endingPourcent}% left, ${sessionState} time`);
+		return { hours, minutes, remaining, endingPourcent, sessionState };
 	});
 
 	createWindow()

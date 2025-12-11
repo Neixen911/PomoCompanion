@@ -4,11 +4,14 @@ declare global {
             startTimer: (minutes: int, secondes: int) => Promise<void>;
             pauseTimer: () => Promise<void>;
             resetTimer: () => Promise<void>;
-            getTimeLeft: () => Promise<{ hours: int; minutes: int; remaining: int, endingPourcent: int }>;
+            getTimeLeft: () => Promise<{ hours: int; minutes: int; remaining: int, endingPourcent: int, sessionState: string }>;
             getAllowedMinutesValues: () => Promise<int[]>;
             getAllowedHoursValues: () => Promise<int[]>;
         };
+        onYouTubeIframeAPIReady: () => void;
     }
+
+    var YT: any;
 }
 
 export { };

@@ -1,5 +1,5 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount } from "svelte";
 
 	const INTERVAL_TICK = 1;
 
@@ -7,19 +7,40 @@
 	let minutesValue;
 	let allowedHoursValues = [];
 	let hoursValue;
+	let player;
 
 	onMount(async () => {
 		allowedMinutesValues = await window.timer.getAllowedMinutesValues();
 		minutesValue = allowedMinutesValues[0];
 		allowedHoursValues = await window.timer.getAllowedHoursValues();
 		hoursValue = allowedHoursValues[0];
+
+		const tag = document.createElement("script");
+		tag.src = "https://www.youtube.com/iframe_api";
+		document.body.appendChild(tag);
+
+		window.onYouTubeIframeAPIReady = () => {
+			player = new YT.Player("yt-player", {
+				videoId: "jfKfPfyJRdk",
+				width: "0",
+				height: "0",
+				playerVars: {
+					autoplay: 0,
+					controls: 0,
+				},
+			});
+		};
 	});
 
 	let remainingPourcentage = 0;
 	let timerInterval;
+	let alreadyPassed = true;
+	let sessionState = "";
 
 	const startTimer = () => {
 		console.log(`Renderer: Starting timer: ${hoursValue}:${minutesValue}`);
+		player?.playVideo();
+		player?.setVolume(50);
 		window.timer.startTimer(hoursValue, minutesValue);
 		if (timerInterval) {
 			clearInterval(timerInterval);
@@ -31,6 +52,8 @@
 
 	const pauseTimer = () => {
 		console.log(`Renderer: Pausing timer`);
+		player?.pauseVideo();
+		player?.setVolume(0);
 		window.timer.pauseTimer();
 		if (timerInterval) {
 			clearInterval(timerInterval);
@@ -51,6 +74,21 @@
 	const updateTimeLeft = async () => {
 		const timeLeft = await window.timer.getTimeLeft();
 		remainingPourcentage = timeLeft.endingPourcent;
+		sessionState = timeLeft.sessionState;
+		if (sessionState === "Pause") {
+			player?.setVolume(15);
+			alreadyPassed = false;
+		}
+		if (alreadyPassed != true && sessionState === "Work") {
+			alreadyPassed = true;
+			player?.setVolume(50);
+		}
+		if (remainingPourcentage <= 0) {
+			player?.setVolume(0);
+			if (timerInterval) {
+				clearInterval(timerInterval);
+			}
+		}
 	};
 </script>
 
@@ -62,7 +100,9 @@
 				id="timer"
 				style="background: conic-gradient(#243e36 0% {remainingPourcentage}%, #7ca982 {remainingPourcentage}% 100%);"
 			>
-				<div id="inner-timer"></div>
+				<div id="inner-timer">
+					<p>{sessionState}</p>
+				</div>
 			</div>
 			<div>
 				<p>Choose your timer:</p>
@@ -83,6 +123,7 @@
 				<button onclick={resetTimer}>Reset</button>
 			</div>
 		</div>
+		<div id="yt-player"></div>
 	</div>
 </main>
 
