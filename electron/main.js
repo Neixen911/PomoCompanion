@@ -51,7 +51,7 @@ const initPause = (eachTimeValue, pauseTimeValue) => {
 	let pauseTime = new Date(now.getTime() + pauseTimeValue * 1000); // 30 sec for testing
 	let pauseEnd = new Date(pauseTime.getTime() + eachTimeValue * 1000); // 5 sec for testing
 	if (global.remainingBeforePause !== null) {
-		if (pauseTime <= global.endDate && pauseEnd <= global.endDate) {
+		if (pauseTime <= global.endDate && pauseEnd - 1000 <= global.endDate) {
 			global.pauseTime = pauseTime;
 			global.pauseEnd = pauseEnd;
 			console.log(`Pause scheduled at ${global.pauseTime} until ${global.pauseEnd}`);
@@ -122,9 +122,7 @@ const resetTimer = () => {
 }
 
 app.whenReady().then(() => {
-	ipcMain.on('startTimer', async (_event, hours, minutes) => {
-		let pauseValue = 5;
-		let eachTime = 30;
+	ipcMain.on('startTimer', async (_event, hours, minutes, pauseValue, eachTime) => {
 		if (global.paused === true) {
 			resumedTimer(pauseValue, eachTime);
 			initPause(pauseValue, global.remainingBeforePause)
@@ -163,7 +161,7 @@ app.whenReady().then(() => {
 		let remaining = global.remaining;
 		let total = hours * 60 * 60 + minutes * 60;
 		let endingPourcent = (100 - ((total - remaining) * 100 / total)).toFixed(2);
-		let sessionState = global.isInPause ? "Pause" : "Work";
+		let sessionState = global.endDate !== null ? (global.isInPause ? "Pause" : "Work") : "";
 		// console.log(`Getting time left: ${hours} hours, ${minutes} minutes, ${remaining} sec remaining, ${endingPourcent}% left, ${sessionState} time`);
 		return { hours, minutes, remaining, endingPourcent, sessionState };
 	});

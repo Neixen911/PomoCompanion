@@ -7,6 +7,9 @@
 	let minutesValue;
 	let allowedHoursValues = [];
 	let hoursValue;
+	let pauseValue = 5;
+	let eachTime = 30;
+
 	let player;
 
 	onMount(async () => {
@@ -41,7 +44,7 @@
 		console.log(`Renderer: Starting timer: ${hoursValue}:${minutesValue}`);
 		player?.playVideo();
 		player?.setVolume(50);
-		window.timer.startTimer(hoursValue, minutesValue);
+		window.timer.startTimer(hoursValue, minutesValue, pauseValue, eachTime);
 		if (timerInterval) {
 			clearInterval(timerInterval);
 		}
@@ -115,6 +118,20 @@
 					{#each allowedMinutesValues as v}
 						<option value={v}>{v}</option>
 					{/each}
+				</select>
+			</div>
+			<div>
+				<p>Pause time:</p>
+				<select bind:value={pauseValue}>
+					<option value=5>5 sec</option>
+					<option value=10>10 sec</option>
+					<option value=15>15 sec</option>
+				</select>
+				<p>Each:</p>
+				<select bind:value={eachTime}>
+					<option value=10>10 sec</option>
+					<option value=20>20 sec</option>
+					<option value=30>30 sec</option>
 				</select>
 			</div>
 			<div>
