@@ -28,4 +28,4 @@ jobs:
     - name: Install back dependencies
       run: npm install --prefix electron
     - name: Build back
-      run: npm run build:win
+      run: npm run build:win --prefix electron
