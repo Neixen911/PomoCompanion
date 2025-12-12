@@ -7,9 +7,7 @@ L'interface utilisateur est conçue pour être intuitve et non intrusive, permet
 
 ### Fonctionnalités
 - [X] Minuteur visuel pour les sessions de travail et de pause
-- [X] Historique des sessions passées
-- [X] Notifications sonores à la fin des sessions
-- [X] Dashboard avec données global
+- [X] Historique des sessions passées via un dashbaord
 
 ### Contribution
 Pour contribuer à ce projet, veuillez suivre les étapes suivantes :
