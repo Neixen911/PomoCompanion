@@ -10,6 +10,23 @@ L'interface utilisateur est conçue pour être intuitve et non intrusive, permet
 - [X] Historique des sessions passées via un dashbaord
 - [X] Musique détente pendant les sessions de travail
 
+### Base de données
+```
+users {
+  id,
+  username
+}
+
+timer_sessions {
+  id,
+  user_id,
+  total_time_seconds,
+  effective_time_seconds,
+  pause_time_seconds,
+  started_at
+}
+```
+
 ### Contribution
 Pour contribuer à ce projet, veuillez suivre les étapes suivantes :
 1. Créer une issue décrivant la fonctionnalité / bug que vous souhaitez aborder.
