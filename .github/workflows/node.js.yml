@@ -26,7 +26,5 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: cd front/
-    - run: npm run build
-    - run: cd ../electron/
-    - run: npm start
+    - run: npm run build --prefix front
+    - run: npm run start --prefix electron
