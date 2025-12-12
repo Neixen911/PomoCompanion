@@ -22,6 +22,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install front dependencies
-    - run: npm install --prefix front
+      run: npm install --prefix front
     - name: Build
-    - run: npm run build --prefix front
+      run: npm run build --prefix front
