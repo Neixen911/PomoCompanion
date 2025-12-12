@@ -1,15 +1,42 @@
 {
   "name": "pomocompanion",
   "version": "1.0.0",
-  "description": "",
+  "description": "PomoCompanion est une application de bureau simple permettant de gérer des sessions de travail basée sur la techinque Pomodoro (25 minutes de travail, 5 minutes de pause).\r L'application vis a maximiser la productivité en alternant des périodes de concentration intense avec des pauses régulières.\r L'interface utilisateur est conçue pour être intuitve et non intrusive, permettant aux utilisateurs de se concentrer sur leur travail tout en gardant un œil sur le temps restant. La présence d'un minuteur visuel prenant la majeure partie de l'application contribue à cette non distraction.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build:win": "electron-builder --win"
+  },
+  "build": {
+    "files": [
+      "**/*",
+      "../front/dist/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../front/dist/",
+        "to": "front/dist",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "directories": {
+      "output": "dist_build"
+    },
+    "win": {
+      "target": "nsis"
+    }
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^39.2.6"
+    "electron": "^39.2.6",
+    "electron-builder": "^24.6.0"
+  },
+  "dependencies": {
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   }
 }
